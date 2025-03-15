@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 import { IsString, MinLength, Matches } from "class-validator";
+import { User } from "../schema/user.schema";
 
 export class UpdatePasswordDto {
   @IsString()
@@ -14,4 +15,9 @@ export class UpdatePasswordDto {
 
   @IsString()
   newPasswordConfirm: string;
+}
+
+export class UpdatePasswordPayload {
+  UpdatePasswordDto: UpdatePasswordDto;
+  user: User; // Add user property to type
 }

@@ -15,6 +15,7 @@ import {
 } from "@nestjs/common";
 import { Request } from "express";
 import { User } from "../users/schema/user.schema";
+import { RpcException } from "@nestjs/microservices";
 
 export interface AuthRequest extends Request {
   user?: User;
@@ -26,16 +27,8 @@ export class AuthGuard implements CanActivate {
     @InjectModel(User.name) private readonly userModel: Model<User>,
   ) {}
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const req = context.switchToHttp().getRequest<AuthRequest>();
-    const authorization = req.headers?.authorization;
-    let token: string | null = null;
-
-    // Extract token from header or cookie
-    if (authorization?.startsWith("Bearer ")) {
-      token = authorization.split(" ")[1];
-    } else if (req.cookies?.jwt) {
-      token = req.cookies.jwt;
-    }
+    const ctx = context.switchToRpc().getData();
+    const token = ctx.token.split(" ")[1];
 
     if (!token) {
       throw new UnauthorizedException("You are not logged in! Please log in.");
@@ -59,12 +52,15 @@ export class AuthGuard implements CanActivate {
         );
       }
       // Attach user to request
-      req.user = user;
+      console.log("user from guard", user);
+      ctx.user = user;
       return true;
     } catch (error) {
-      console.log("err", error);
+      console.log("err from guard", error);
 
-      throw new BadRequestException("Invalid or expired token.");
+      throw new RpcException(
+        new BadRequestException("Invalid or expired token."),
+      );
     }
   }
 }

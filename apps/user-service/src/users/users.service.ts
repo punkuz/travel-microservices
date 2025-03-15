@@ -3,10 +3,13 @@ import { InjectModel } from "@nestjs/mongoose";
 import { User } from "./schema/user.schema";
 import { Model } from "mongoose";
 import { createSendToken } from "src/extra/jwt-token";
-import { UpdatePasswordDto } from "./dto/update-password";
-import { AuthRequest } from "src/guards/auth.guard";
+import {
+  UpdatePasswordDto,
+  UpdatePasswordPayload,
+} from "./dto/update-password";
 import { UserInterface } from "src/types/user.types";
 import { LoginDto } from "./dto/login.dto";
+import { RpcException } from "@nestjs/microservices";
 
 @Injectable()
 export class UsersService {
@@ -50,7 +53,7 @@ export class UsersService {
         user.password,
       ))
     ) {
-      throw new BadRequestException("Incorrect email or password");
+      throw new RpcException("Incorrect email or password");
     }
 
     //update last login
@@ -66,33 +69,33 @@ export class UsersService {
   @route /api/v1/user/updatemypassword
   @access private
 **/
-  async updatePassword(body: UpdatePasswordDto, req: AuthRequest) {
+  async updatePassword(body: UpdatePasswordDto, user: User) {
     // 1) Get user from collection
-    const user = await this.userModel
-      .findById(req.user?.id)
+    const userData = await this.userModel
+      .findById(user?.id)
       .select("+password");
 
-    if (!user) {
+    if (!userData) {
       throw new BadRequestException("User not found."); // Handle the case where the user is not found
     }
 
     // 2) Check if provided current password is correct
     if (
-      !(await (user as unknown as UserInterface).correctPassword(
+      !(await (userData as unknown as UserInterface).correctPassword(
         body.currentPassword,
-        user.password,
+        userData.password,
       ))
     ) {
       throw new BadRequestException("Your current password is wrong.");
     }
 
     // 3) If so, update password
-    user.password = body.newPassword;
-    user.passwordConfirm = body?.newPasswordConfirm;
-    await user.save();
+    userData.password = body.newPassword;
+    userData.passwordConfirm = body.newPasswordConfirm;
+    await userData.save();
 
     // 4) Log user in, send JWT
-    return createSendToken(user);
+    return createSendToken(userData);
   }
 
   async getAllUsers(): Promise<User[]> {

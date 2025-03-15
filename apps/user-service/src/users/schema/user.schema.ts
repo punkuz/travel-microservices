@@ -89,7 +89,7 @@ UserSchema.pre("save", async function (next) {
   try {
     // Hash the password with cost of 12
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-    this.password = (await bcrypt.hash(this.password, 12)) as string;
+    this.password = await bcrypt.hash(this.password, 12);
 
     // Delete passwordConfirm field
     this.passwordConfirm = undefined;
@@ -110,8 +110,10 @@ UserSchema.methods.correctPassword = async function (
   candidatePassword: string | Buffer,
   userPassword: string,
 ) {
+  console.log("the correct", candidatePassword, userPassword);
+
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-  return (await bcrypt.compare(candidatePassword, userPassword)) as boolean;
+  return await bcrypt.compare(candidatePassword, userPassword);
 };
 
 UserSchema.methods.createPasswordResetToken = function () {
