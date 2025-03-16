@@ -15,6 +15,8 @@ enum Role {
   Guide = "guide",
 }
 export class CreateUserDto {
+  id: string;
+
   @IsNotEmpty()
   @IsString()
   name: string;

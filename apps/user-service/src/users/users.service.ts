@@ -101,4 +101,8 @@ export class UsersService {
   async getAllUsers(): Promise<User[]> {
     return this.userModel.find();
   }
+
+  async findOne(id: string): Promise<User | null> {
+    return this.userModel.findById(id);
+  }
 }

@@ -11,7 +11,6 @@ export class UserController {
   ) {}
   @Post("signup")
   signup(@Body() user: CreateUserDto) {
-    console.log("from api gateway", user);
     return this.userClient.send("user_signup", user);
   }
   //add a comment

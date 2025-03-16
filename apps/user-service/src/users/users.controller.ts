@@ -1,10 +1,14 @@
-import { Controller, UseGuards } from "@nestjs/common";
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+import { promisify } from "util";
+import * as jwt from "jsonwebtoken";
+
+import { BadRequestException, Controller, NotFoundException, UseGuards } from "@nestjs/common";
 import { UsersService } from "./users.service";
 import { User } from "./schema/user.schema";
-import {
-  UpdatePasswordDto,
-  UpdatePasswordPayload,
-} from "./dto/update-password";
+import { UpdatePasswordPayload } from "./dto/update-password";
 import { AuthGuard } from "src/guards/auth.guard";
 import { LoginDto } from "./dto/login.dto";
 import { Roles } from "src/decorators/roles.decorator";
@@ -41,5 +45,26 @@ export class UsersController {
   @UseGuards(AuthGuard)
   getAllUsers() {
     return this.userService.getAllUsers();
+  }
+
+  @MessagePattern("verify_token")
+  async verifyToken(token: string): Promise<User> {
+    try {
+      const decoded: jwt.JwtPayload = await promisify(jwt.verify)(
+        token["token"],
+        process.env.JWT_SECRET,
+      );
+
+      const user = await this.userService.findOne(decoded.id);
+
+      if (!user) {
+        throw new NotFoundException("User not found.");
+      }
+
+      return user;
+    } catch (error) {
+      console.log("err from verify token", error);
+      throw new BadRequestException("Invalid or expired token.");
+    }
   }
 }

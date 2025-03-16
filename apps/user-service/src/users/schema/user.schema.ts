@@ -110,8 +110,6 @@ UserSchema.methods.correctPassword = async function (
   candidatePassword: string | Buffer,
   userPassword: string,
 ) {
-  console.log("the correct", candidatePassword, userPassword);
-
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call
   return await bcrypt.compare(candidatePassword, userPassword);
 };
