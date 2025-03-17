@@ -10,6 +10,7 @@ import { ClientsModule, Transport } from "@nestjs/microservices";
 import { TourController } from "./tour/tour.controller";
 import { AuthMiddleware } from "./middleware/protect.middleware";
 import { ReviewController } from "./review/review.controller";
+import { BookingController } from "./booking/booking.controller";
 
 @Module({
   imports: [
@@ -39,9 +40,22 @@ import { ReviewController } from "./review/review.controller";
           port: 3003,
         },
       },
+      {
+        name: "BOOKING_CLIENT",
+        transport: Transport.TCP,
+        options: {
+          host: "127.0.0.1",
+          port: 3004,
+        },
+      },
     ]),
   ],
-  controllers: [UserController, TourController, ReviewController],
+  controllers: [
+    UserController,
+    TourController,
+    ReviewController,
+    BookingController,
+  ],
   providers: [],
 })
 export class AppModule implements NestModule {
