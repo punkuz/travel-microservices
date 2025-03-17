@@ -5,7 +5,12 @@
 import { promisify } from "util";
 import * as jwt from "jsonwebtoken";
 
-import { BadRequestException, Controller, NotFoundException, UseGuards } from "@nestjs/common";
+import {
+  BadRequestException,
+  Controller,
+  NotFoundException,
+  UseGuards,
+} from "@nestjs/common";
 import { UsersService } from "./users.service";
 import { User } from "./schema/user.schema";
 import { UpdatePasswordPayload } from "./dto/update-password";
@@ -66,5 +71,10 @@ export class UsersController {
       console.log("err from verify token", error);
       throw new BadRequestException("Invalid or expired token.");
     }
+  }
+
+  @MessagePattern("get_user")
+  getUser(id: string): Promise<User | null> {
+    return this.userService.findOne(id);
   }
 }

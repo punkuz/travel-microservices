@@ -43,7 +43,7 @@ export class ReviewController {
   @Roles(Role.User)
   @UseGuards(RolesGuard)
   @UseGuards(AuthGuard)
-  findAll(@Param("tourId") tourId: string, @Request() req: AuthRequest) {
+  findAll(@Param("tourId") tourId: string) {
     return this.reviewClient.send("get_all_tour_reviews", tourId);
   }
 
